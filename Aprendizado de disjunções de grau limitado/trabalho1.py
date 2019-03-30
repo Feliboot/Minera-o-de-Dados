@@ -12,12 +12,7 @@ m = 3
 import numpy as np
 import itertools as it
 
-S = np.random.randint(0, 2, size=(m,n)) #exemplo de amostra
-
-A = [0, 1, -1]
-Todos = it.product(A, repeat=n)
-Todos = [list(i) for i in Todos]
-
+#FUNCOES---------------------------------------------------------------------------
 def achar_classe(mon,sample):
     classe=[]
     for i in range(m):
@@ -30,7 +25,33 @@ def achar_classe(mon,sample):
         classe.append(c)
     return classe  
 
+def todosMonomiosPossiveis():
+        
+    n = 3 # Numero total de variables: x1, x2, ..., xn
+    A = [0, 1, -1]
+    # U = Todos monomios possiveis
+    U = it.product(A, repeat=n)
+    U = [list(i) for i in Todos]
+    U.remove([0,0,0])
+    return U
 
+def verificarClasse(mon,sample):
+    for i in range(m):
+        for literal in mon:
+            if literal<0 and sample[i][-literal-1]==1:
+                if classe[i]==1:
+                    return mon
+            elif literal>0 and sample[i][literal-1]==0:
+                if classe[i]==1:
+                    return mon
+
+#-------------------------------------------------------------------------------------------------
+    
+S = np.random.randint(0, 2, size=(m,n)) #exemplo de amostra
+
+A = [0, 1, -1]
+Todos = it.product(A, repeat=n)
+Todos = [list(i) for i in Todos]
 # Guardar em M apenas os monomios de grau 1, 2, e 3
 M = []
 for monomio in Todos:
@@ -79,17 +100,14 @@ for convert in classe_booleana:
     classe.append(int(convert))
 print('class:' ,classe)
 
-
-#Esse pedaço de codigo aqui embaixo é do codigo
-#passado em sala pelo professor, poderiamos começar daqui construir o nosso!
-# for i in range(m):
-#     if classe[i] == 1:
-#         for j in range(n):
-#             if S[i][j]==1:
-#                 #remove de U o elemento -(j+1)
-#                 if M.count(-j-1)>0:
-#                     M.remove(-j-1)
-#             else:
-#                 if M.count(j+1)>0:
-#                     M.remove(j+1)
-#     print(M)
+todosMonomios = todosMonomiosPossiveis()
+#Corro toda a lista de monomios criada para essa tarefa, e as removo da lista de monomios original, criada laaaaa em cima >>TODOS<<
+print('-----------------------------------------')
+print('Monomios para remover:')
+for i in range(len(todosMonomios)):
+    monomiosToDelete = (verificarClasse(todosMonomios[i],S))
+    print(monomiosToDelete)
+    if Todos.count(monomiosToDelete)>0:
+        Todos.remove(monomiosToDelete)
+print('Todos os monomios restantes:')
+print(Todos)
