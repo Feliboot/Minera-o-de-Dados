@@ -60,20 +60,7 @@ def trabalhoAlgoritmoDisjuncoes(n,m,k):
     A = [0, 1, -1]
     Todos = it.product(A, repeat=n)
     Todos = [list(i) for i in Todos]
-    
-    #Todos = todosMonomiosPossiveis()
-    # Guardar em M apenas os monomios de grau 1, 2, e 3
-    M = []
-    for monomio in Todos:
-        c = [abs(v) for v in monomio]
-        if 1 <= sum(c) <= 3:
-            M.append(monomio)
-    
-    #print('\n----------------------------------------------------------------\n')
-    #print('Monomios de grau 1, 2, e 3:')
-    #print(M)
-    
-    
+   
     #criando os monomios conceitos utilizados para gerar a classe
     lista_monomio_conceito=[]
     for i in range(1,k+1):
