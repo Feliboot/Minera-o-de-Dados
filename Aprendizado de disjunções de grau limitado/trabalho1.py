@@ -1,7 +1,4 @@
-## Introducao aa Mineracao de Dados, 2019.1, UFC/DEMA
-##
-## Gerar todos os monomios de grau 1, 2, e 3
-## Cada monomio sera' representado por um tupla
+
 #NOME: FELIPE ARAUJO MAGALHAES - 378599
 #NOME: LUCAS NOLETO PAIVA - 390192
 #
@@ -132,4 +129,3 @@ trabalhoAlgoritmoDisjuncoes(3,3,3)
 
 #Se todo o trabalho estiver correto, nos recomendamos a seguinte trilha sonora para executar o código:
 #>>>>>https://www.youtube.com/watch?v=O71fetlkCZo
-#deu trabalho kkkkkkk
