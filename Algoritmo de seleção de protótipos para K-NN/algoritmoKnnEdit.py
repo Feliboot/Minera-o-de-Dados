@@ -1,36 +1,69 @@
-import numpy as np
 import pandas as pd
 import matplotlib as plt
+import numpy as np
+from sklearn import datasets
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import confusion_matrix, accuracy_score
+from sklearn.model_selection import train_test_split
+from sklearn.datasets import load_wine
 
-def distanciaEuclidiana(a, b):
-    d = (a[0] - b[0])**2 + (a[1] - b[1])**2
-    return np.sqrt(d)
 
 #------------------------------------------------------------------------------
-# Dimensoes dos dados
-m =  500   # Numero de exemplos na amostra
-t =  100   # Numero de exemplos de teste
-
 # Numero de vizinhos
-K = 3
+K = [2,3,5]
 
-# Numero de classes
-C = 2 # Assumimos neste codigo que as classes dos dados sao: 0, 1, ..., C-1
 
-#------------------------------------------------------------------------------
-# Gerar exemplos de treinamento aleatoriamente
-# np.random.seed(8)                    # Semente do gerador aleatorio
-S = np.random.rand(m,2)                # Exemplos da amostra
+S = load_wine()
 
-# Informacao de classe
-# Neste codigo, a classe de um exemplo de treinamento e' 1 se a distancia
-# do exemplo ate o ponto (0.5,0.5) e' maior que 0.3; caso contrario, a
-# classe do exemplo e' 0.
-classe_S = [1]*m
-for i in range(m):
-    d = distanciaEuclidiana(S[i], [0.5, 0.5])
-    if d < 0.3:
-        classe_S[i] = 0
+accKnnGeral=[]
+accEditKnnGeral=[]
+#dados agora gerados, vamos utilizar knn 
+for num_vizinhos in K:
+    for j in range (1,11):
+        accKnn=[]
+        
+        x_train, x_test, y_train, y_test = train_test_split(
+               S.data, S.target , test_size=0.33)
+        
+        neigh = KNeighborsClassifier(num_vizinhos)
+        neigh.fit(x_train, y_train)
+        y_pred = neigh.predict(x_test)
+        accKnn.append(accuracy_score(y_test,y_pred))
 
-df = pd.DataFrame(data = S, columns = ["x1","x2"])
-df["Classe"] = classe_S
+        print("Data set na partição {0}, Valor de accuracy para k ={1}" .format(j,num_vizinhos))
+        print(accKnn)
+        accKnnGeral.append(accKnn)
+        #estou adicionando aqueles que foram classificados incorretamente por S ao S_linha, ou seja, algoritmo 2 do livro 
+        #sobre edit knn
+        S_linha_x = []
+        S_linha_classe=[]
+        for i in range(len(y_test)):
+            if y_pred[i] != y_test[i]:
+                S_linha_x.append(x_train[i])
+                S_linha_classe.append(y_test[i])
+
+        print('------------------------------------------------------------------------------')
+#         print(S_linha_x,end="\n\n")
+#         print(S_linha_classe)
+
+        x_train, x_test, y_train, y_test = train_test_split(
+           S_linha_x, S_linha_classe , test_size=0.33)
+
+        accEditKnn=[]
+
+        neigh = KNeighborsClassifier(K[1])
+        neigh.fit(x_train, y_train)
+        y_pred = neigh.predict(x_test)
+        accEditKnn.append(accuracy_score(y_test,y_pred))
+
+        print("Valor de accuracy do edit Knn para k = {}".format(num_vizinhos))
+        print(accEditKnn)
+        accEditKnnGeral.append(accEditKnn)
+        print('------------------------------------------------------------------------------')
+        print('------------------------------------------------------------------------------')
+        print('------------------------------------------------------------------------------')
+
+        
+#print de accuracy de todos os knn's feitos tanto no S original como no S'         
+#Print(accKnnGeral)
+#print(accEditKnnGeral)
