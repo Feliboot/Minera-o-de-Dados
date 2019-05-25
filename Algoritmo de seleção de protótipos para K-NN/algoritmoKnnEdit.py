@@ -1,3 +1,7 @@
+#Nome:FELIPE ARAUJO MAGALHAES	Matrícula:378599
+#Nome:LUCAS NOLETO PAIVA		Matrícula:390192
+#
+
 import pandas as pd
 import matplotlib as plt
 import numpy as np
@@ -18,6 +22,7 @@ S = load_wine()
 accKnnGeral=[]
 accEditKnnGeral=[]
 #dados agora gerados, vamos utilizar knn 
+print('Usando dataset wine:')
 for num_vizinhos in K:
     for j in range (1,11):
         accKnn=[]
@@ -30,7 +35,7 @@ for num_vizinhos in K:
         y_pred = neigh.predict(x_test)
         accKnn.append(accuracy_score(y_test,y_pred))
 
-        print("Data set na partição {0}, Valor de accuracy para k ={1}" .format(j,num_vizinhos))
+        print("Data set na partição {0}, usando KNN(scikitLearn), valor de accuracy para k ={1}" .format(j,num_vizinhos))
         print(accKnn)
         accKnnGeral.append(accKnn)
         #estou adicionando aqueles que foram classificados incorretamente por S ao S_linha, ou seja, algoritmo 2 do livro 
