@@ -1,80 +1,95 @@
-#Felipe Araújo - 378599
-#Lucas Noleto - ...
-# UFC/DEMA, UFC/MMQ, 2019.1
-# Criacao de um classificador para ser usado com recursos do scikit-learn
+#Felipe Araujo - 378599
+#Lucas Noleto - 
 
 import numpy as np
-from sklearn import datasets, svm
+
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import RepeatedKFold,\
     RepeatedStratifiedKFold, cross_val_score
 from sklearn.base import BaseEstimator
-from sklearn.ensemble import AdaBoostClassifier
 #------------------------------------------------------------------------------
-'''
-O classificador deve ser derivado de BaseEstimator, deve ter os metodos fit,
-predict, e score. O metodo fit deve retornar a referencia self. O classificador
-abaixo nao possui hiperparametros e simplesmente detecta a classe mais
-frequente no conjunto de treinamento. A classificacao de novos exemplos e' dada
-por esta classe.
-'''
-class Pereba():
-    
-    def __init__(self,p,l):
+
+class ClassificadorComAjuste(BaseEstimator):
+    '''
+    ClassificadorComAjuste:
+        clf = ClassificadorComAjuste()
+        Classificador com ajustes automáticos, onde o mesmo retorna o modelo
+        com melhor acurácia de treinamento, utilizando validação cruzada para
+        isso.
+
+    '''
+    def __init__(self):
         # Atribui um valor padrao para a previsao
         # O valor real deste atributo sera' detectado no metodo 'fit'
         self.__classe_prevista = 0
-        self.p=p
-        self.l=l
+      
         
         pass
 
     '''
     fit(X, y):
-    Detecta e armazena a classe mais frequente no conjunto de treinamento (X,y)
+    Detecta e armazena o melhor valor do parametro passado para o modelo.
     '''
-    def fit(self, X, y):
-        parametros = dict()
-        parametros[self.p]=self.l
-        for K in self.l:
-            AdaBoostClassifier(**parametros)
-
+    def fit(self, X, y,p,l):
+        self.__p = p
+        self.__l = l
         
-        # Obter as classes e suas frequencias
-        classes, frequencias = np.unique(y, return_counts=True)
-        # Armazenar classe mais frequente no conjunto de treinamento
-#        self.__classe_prevista = classes[np.argmax(frequencias)]
+        parametros = dict()
+        parametros[str(p)]=l
+#        print(p)
+#        print()
+#        print(l)
+        melhores_precisoes = dict()
+        
+        for K in l:
+            self.model = KNeighborsClassifier(p=K)
+            self.model.fit(X,y)
+            
+            particao = RepeatedKFold(n_splits=2, n_repeats=1)
+            precisoes = np.mean(cross_val_score(self.model, X, y, cv=particao))
+            melhores_precisoes[K]=precisoes
+            print("Avaliando classificador com <"+p+">="+str(K)+". Acuraria:", precisoes)
+
+        print("----------")
+        key = max(melhores_precisoes, key= lambda k : melhores_precisoes[k])
+        
+        print("Melhor classficador:"+p+":",key)
+        self.model_aux= KNeighborsClassifier(p=key)
+        self.model_aux.fit(X,y)
         # Regra do scikit-learn: metodo fit() sempre deve retornar 'self'
         return self
 
     '''
     predict(T):
-    Recebe um conjunto de exemplos de teste e retorna lista com previsoes. As
-    previsoes sao todas iguais a self.__classe_prevista.
+    Recebe um conjunto de exemplos de teste e retorna lista com previsoes.
     '''
     def predict(self, T):
         
         # Preencher vetor com a classe mais frequente
-        previsao = []
-        for i in range(len(T)):
-            previsao.append(self.__classe_prevista)
-
-        return previsao
+        return self.model.predict(T)
+#        previsao = []
+#        for i in range(len(T)):
+#            previsao.append(self.__classe_prevista)
+#
+#        return previsao
 
     '''
     score(X,y):
     Recebe exemplos de teste e a classe real dos mesmos. Devolve o percentual
     de exemplos classificados corretamente.
     '''    
-    def score(self, X, y=None):
+    def score(self,x_teste,classe_teste):
         
         # Obter vetor de previsao
-        previsao = self.predict(X)
+        previsao = self.predict(x_teste)
         
         # Retornar percentual de exemplos corretamente classificados
-        return sum(np.equal(previsao, y))/len(previsao)
+        return metrics.accuracy_score(classe_teste,previsao)
 
 #------------------------------------------------------------------------------
-
+from sklearn.model_selection import train_test_split
+from sklearn import datasets
+from sklearn import metrics
 
 # Leitura dos dados
 S = datasets.load_breast_cancer()
@@ -84,18 +99,15 @@ classe = S.target
 m, n = observacoes.shape
 print('Numero de exemplos:', m)
 print('Numero de caracteristicas:', n)
-
+#splitin dos dados
+x_train, x_test, y_train, y_test = train_test_split(
+       observacoes, classe , test_size=0.33)
 #------------------------------------------------------------------------------
 # Construcao do classificador
-per = Pereba()
 
-#------------------------------------------------------------------------------
-# Esquema de particao dos dados
-particao = RepeatedKFold(n_splits=5, n_repeats=1)
+clf = ClassificadorComAjuste()
+clf.fit(x_train,y_train,"n_neighbors",[5,7,9])
+y_pred=clf.predict(x_test)
 
-# Precisao da validacao cruzada
-precisoes = cross_val_score(per, observacoes, classe, cv=particao)
+print("Score de acerto prevendo x_test",round(clf.score(x_test,y_test),4))
 
-print('Precisao media:', np.round(np.average(precisoes), 4), end='\n')
-
-#------------------------------------------------------------------------------
